@@ -1,3 +1,4 @@
+
 # DATAD: Driver Attention in Takeover of Autonomous Driving
 
 ## Overview
@@ -17,33 +18,39 @@ The dataset is collected from **60 participants** across **12 types of takeover 
 
 ```
 DATAD/
-
+├── DATA/               # Main dataset (not included here due to large size)
+│   ├── Tester1/
+│   ├── Tester2/
+│   └── ...             # Up to Tester10
+├── Script/             # Python scripts for processing and visualization
+│   ├── visualize_gaze.py
+│   └── ...
+├── README.md
+└── LICENSE
 ```
 
-### 2. Data Format
-The subset consists of:
+> 💾 Due to storage limitations, the full dataset (~40 GB per subject) is not hosted in this repository.  
+> You can download individual subjects' data at:  
+> 👉 https://huggingface.co/datasets/OOParts/DATAD
+
+---
+
+## 2. Data Format
+
+Each subject's folder (e.g., `Tester1/`) contains:
 - **Gaze Data**: Eye-tracking coordinates, timestamps, fixation durations
 - **Driving Data**: Steering angles, brake and accelerator positions, speed
 - **Traffic Context**: Surrounding vehicle positions, velocities, and object categories
 - **RGB Images**: Raw images of the driver’s foreground view
 - **Semantic Segmentation Maps**: Instance-labeled foreground objects
 
-### 3. Using the Dataset
-Load the dataset using Python:
-```python
-wait update
-```
+---
 
-### 4. Visualizing Gaze Trajectories
-Run the visualization script to generate gaze point picture:
-```bash
-wait update
-```
+## 3. Using the Dataset
 
+Download the dataset and you can directly use it by reading readme in each filefold:
 
 
 ## License
+
 This dataset is released under the MIT License. See `LICENSE` for details.
-
-
-
