@@ -14,6 +14,17 @@ The dataset is collected from **60 participants** across **12 types of takeover 
 - **Emergency scenarios**: Captures real-time driver reactions to critical events
 - **Rich metadata**: Position, velocity, acceleration, and yaw angle of surrounding vehicles
 
+
+## Dataset Examples
+
+### 🧪 Equipment Setup
+![Equipment](https://github.com/OOPartsfili/DATAD/raw/main/image/equip.png)
+
+### ✅ Output Check Example
+![Output Check](https://github.com/OOPartsfili/DATAD/raw/main/image/output_check.png)
+
+
+
 ## Repository Structure
 
 ```
