@@ -63,7 +63,7 @@ Each subject's folder (e.g., `Tester1/`) contains:
 - **Traffic Context**: Surrounding vehicle positions, velocities, and object categories
 - **Semantic Segmentation Maps**: Instance-labeled foreground objects
   
-The RGB images have not been uploaded due to their large file size. If you would like to access the image data, please contact us by opening an issue.
+- The RGB images have not been uploaded due to their large file size. If you would like to access the image data, please contact us by opening an issue.
 ---
 
 ## 3. Using the Dataset
