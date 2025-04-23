@@ -17,12 +17,21 @@ The dataset is collected from **60 participants** across **12 types of takeover 
 
 ## Dataset Examples
 
-### 🧪 Equipment Setup
-![Equipment](https://github.com/OOPartsfili/DATAD/raw/main/image/equip.png)
+### 🧪 Data Collection Platform Description
+![Data Collection Platform](https://github.com/OOPartsfili/DATAD/raw/main/image/equip.png)
 
-### ✅ Output Check Example
-![Output Check](https://github.com/OOPartsfili/DATAD/raw/main/image/output_check.png)
+To ensure the authenticity of gaze data, all takeover scenarios in this dataset were conducted on a real-vehicle-based driving simulation platform. As shown in the images above, the platform integrates a full-scale real vehicle with an immersive surround projection system, providing participants with highly realistic visual and operational feedback. The setup includes:
 
+Real Vehicle Platform: As shown in the top-left image, we built a four-wheel dynamometer testbed with adjustable wheelbase, enabling compatibility with real vehicles of different brands and sizes. Since the driver operates an actual vehicle ("real car in loop"), the use of a genuine steering wheel, accelerator, and brake pedals ensures high fidelity in driving interaction (including rollable wheels).
+
+Surround Projection System: The driving environment is rendered in CARLA and projected onto a large-angle curved screen, creating an immersive and realistic visual experience. As shown in the second and third images on the left, the virtual scenes faced by the driver closely resemble real road environments.
+
+Remote Eye-Tracking System: As shown in the third image, a contactless remote eye tracker is installed inside the cabin. It records gaze point coordinates continuously at 60 Hz and also captures physiological metrics such as eyelid openness and pupil diameter.
+
+
+### ✅ Qualitative Comparison
+![Qualitative Comparison](https://github.com/OOPartsfili/DATAD/raw/main/image/output_check.png)
+As shown in Fig. X, we visualize the gaze prediction results across three critical frames in an urban driving scenario involving a sudden vehicle intrusion from the right. Our model, PILOT, demonstrates strong consistency with the ground truth by accurately capturing the driver’s gaze shift from the forward-looking position (Frame #195) to the intruding vehicle (Frame #205). Compared to baseline methods, PILOT maintains sharper focus and better temporal consistency. In contrast, models such as DRIVE and PGnet tend to exhibit dispersed attention or delayed reactions. DBVM sometimes overemphasizes non-salient distant regions, while DR(eye)VE often fixates on central or static objects, missing dynamic threats. These observations highlight the superiority of PILOT in modeling attention transitions in real-time, safety-critical scenes.
 
 
 ## Repository Structure
