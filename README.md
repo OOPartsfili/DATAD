@@ -61,14 +61,14 @@ Each subject's folder (e.g., `Tester1/`) contains:
 - **Gaze Data**: Eye-tracking coordinates, timestamps, fixation durations
 - **Driving Data**: Steering angles, brake and accelerator positions, speed
 - **Traffic Context**: Surrounding vehicle positions, velocities, and object categories
-- **RGB Images**: Raw images of the driver’s foreground view
 - **Semantic Segmentation Maps**: Instance-labeled foreground objects
-
+  
+The RGB images have not been uploaded due to their large file size. If you would like to access the image data, please contact us by opening an issue.
 ---
 
 ## 3. Using the Dataset
 
-Download the dataset and you can directly use it by reading readme in each filefold:
+Download the dataset and you can directly use it by reading readme in each filefold.
 
 
 ## License
