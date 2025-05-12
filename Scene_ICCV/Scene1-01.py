@@ -6,10 +6,7 @@ import Set_taskpoint
 import Set_info
 import time
 
-"""
 
-
-"""
 
 
 # 新的页面窗口

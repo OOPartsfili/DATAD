@@ -1,119 +1,153 @@
-from vehicle_method import *
+"""
+This module records driving-related signals (driver inputs, vehicle state,
+take-over flags, collision info, …) into a CSV file at a fixed rate.
+
+Core classes / functions
+------------------------
+• `Info`      – collects data continuously in a background thread.
+• `dict_0`    – the main in-memory store before dumping to CSV.
+"""
+
+from vehicle_method import *       # utility helpers (get_speed, …)
 import threading
 import csv
 import time
+import math
 
-# dict_0 是CSV文件的关键
-dict_0 = {"time": [],
-        "steering": [],
-        "accelerator": [],
-        "brake": [],
-        # "main_car_dev":[],
-        'TOR_flag':[], #0为未接管、1为发出接管
-        'Handchange_flag':[],
-        "Collision_flag":[] #0为未碰撞，其他数为碰撞物ID
-          }
+# --------------------------------------------------------------------- #
+# In-memory data container – every key maps to a growing list.
+# --------------------------------------------------------------------- #
+dict_0 = {
+    "time": [],              # timestamp (s)
+    "steering": [],          # steering-wheel angle
+    "accelerator": [],       # accelerator pedal position
+    "brake": [],             # brake pedal position
+    # "main_car_dev": [],    # lane deviation if you need it
+    "TOR_flag": [],          # 0 = no take-over, 1 = take-over request issued
+    "Handchange_flag": [],   # driver switched to manual control?
+    "Collision_flag": [],    # 0 = no collision, otherwise collider ID
+}
 
+# --------------------------------------------------------------------- #
+# Helper functions
+# --------------------------------------------------------------------- #
 def get_vehicle_yaw(vehicle):
-    # 获取车辆的变换信息
-    vehicle_transform = vehicle.get_transform()
-    # 获取车辆的方向（四元数表示）
-    rotation = vehicle_transform.rotation
-    # 将四元数转换为欧拉角（弧度）
-    pitch, yaw, roll = rotation.pitch, rotation.yaw, rotation.roll
-    # 将偏航角限制在0到2*pi之间
-    yaw = math.radians(yaw)
-    return yaw
+    """Return vehicle yaw in radians within [0, 2π)."""
+    yaw_deg = vehicle.get_transform().rotation.yaw
+    return math.radians(yaw_deg % 360)
+
 
 def get_lane_deviation(vehicle):
-    # 获取车辆的位置
+    """Distance between vehicle location and lane center (m)."""
     vehicle_location = vehicle.get_location()
-    # 获取最近的道路点
     waypoint = world.get_map().get_waypoint(vehicle_location)
-    # 获取车道中心线的位置
     lane_center = waypoint.transform.location
-    # 计算车辆和车道中心线之间的距离
-    deviation = vehicle_location.distance(lane_center)
-    return deviation
+    return vehicle_location.distance(lane_center)
 
+
+# --------------------------------------------------------------------- #
+# Data-logging class
+# --------------------------------------------------------------------- #
 class Info:
-    def __init__(self, dict_index, dict_0, file_name, fps=60):
-        self.car_list = []
-        self.flag = True
+    """
+    Collects information from a list of CARLA vehicles and driver input
+    devices, then dumps everything to CSV when `save_info()` is called.
+
+    Parameters
+    ----------
+    dict_index : list[str]
+        Short identifiers for each vehicle (e.g. ['ego', 'npc1', …]).
+    dict_0 : dict[str, list]
+        The master dictionary that stores column → list.
+    file_name : str
+        CSV file path to write when finished.
+    fps : int, optional
+        Target logging frequency in Hz (default 60).  The actual sleep
+        interval is slightly offset (`+70` trick) to fine-tune overhead.
+    """
+
+    def __init__(self, dict_index, dict_0, file_name, fps: int = 60):
+        self.car_list = []              # list[carla.Vehicle]
+        self.flag = True                # controls the background loop
         self.dict_index = dict_index
         self.dict_0 = dict_0
         self.fps = fps
         self.file_name = file_name
-        self.TOR_flag = 0   # 专门获取TOR发出时间的
-        self.Handchange_flag = 0 # 驾驶员切换到手动驾驶的旗帜
-        self.Collision_flag = 0 #专门获取碰撞对象
 
-    # 获取数据
+        # flags updated by the main program
+        self.TOR_flag = 0
+        self.Handchange_flag = 0
+        self.Collision_flag = 0
+
+    # ----------------------------------------------------------------- #
+    # Start background thread
+    # ----------------------------------------------------------------- #
     def get_info(self):
-        # 一旦开始运行，就以特定频率记录car_list中所有车辆的数据
-        def getinfo():
-            # 只要self.flag为True ，就进行CSV数据记录
+        """Launch a thread that samples data until `self.flag` is False."""
+
+        def _loop():
             while self.flag:
-                self.dict_0["time"].append(round(time.time(),3))  # 添加时间戳
-                steering, accelerator ,brake= get_sensor_data() #获取方向盘，油门，踏板
+                # --- driver inputs ------------------------------------ #
+                self.dict_0["time"].append(round(time.time(), 3))
+                steering, accelerator, brake = get_sensor_data()
                 self.dict_0["steering"].append(steering)
                 self.dict_0["accelerator"].append(accelerator)
                 self.dict_0["brake"].append(brake)
 
-                # 主车专属变量 默认car_list[0]为主车
-                # ttc_list = [ttc(self.car_list[0], v) for v in self.car_list[1:]]
-                # self.dict_0["main_car_TTC"].append(min(ttc_list))
-                # self.dict_0["main_car_dev"].append(get_lane_deviation(self.car_list[0]))
+                # --- global flags ------------------------------------- #
                 self.dict_0["TOR_flag"].append(self.TOR_flag)
                 self.dict_0["Collision_flag"].append(self.Collision_flag)
                 self.dict_0["Handchange_flag"].append(self.Handchange_flag)
 
-                # car_list是所有车的位置信息
-                for index, car in enumerate(self.car_list):
-                    if self.dict_0.get(f"{self.dict_index[index]}_id") is None:
-                        self.dict_0[f"{self.dict_index[index]}_id"] = [car.id]
-                        location = car.get_location()
-                        self.dict_0[f"{self.dict_index[index]}_x"] = [location.x]
-                        self.dict_0[f"{self.dict_index[index]}_y"] = [location.y]
-                        self.dict_0[f"{self.dict_index[index]}_z"] = [location.z]
-                        self.dict_0[f"{self.dict_index[index]}_speed(km/h)"] = [get_speed(car)]
-                        self.dict_0[f"{self.dict_index[index]}_accx"] = [car.get_acceleration().x] # 加速度
-                        self.dict_0[f"{self.dict_index[index]}_accy"] = [car.get_acceleration().y]  # 加速度
-                        transform = car.get_transform()
-                        self.dict_0[f"{self.dict_index[index]}_pitch"] = [transform.rotation.pitch]
-                        self.dict_0[f"{self.dict_index[index]}_yaw"] = [transform.rotation.yaw]
-                        self.dict_0[f"{self.dict_index[index]}_roll"] = [transform.rotation.roll]
+                # --- per-vehicle data --------------------------------- #
+                for idx, car in enumerate(self.car_list):
+                    tag = self.dict_index[idx]          # e.g. 'ego'
+                    loc = car.get_location()
+                    acc = car.get_acceleration()
+                    rot = car.get_transform().rotation
 
+                    # initialise column lists the first time we see them
+                    if self.dict_0.get(f"{tag}_id") is None:
+                        self.dict_0[f"{tag}_id"] = [car.id]
+                        self.dict_0[f"{tag}_x"] = [loc.x]
+                        self.dict_0[f"{tag}_y"] = [loc.y]
+                        self.dict_0[f"{tag}_z"] = [loc.z]
+                        self.dict_0[f"{tag}_speed(km/h)"] = [get_speed(car)]
+                        self.dict_0[f"{tag}_accx"] = [acc.x]
+                        self.dict_0[f"{tag}_accy"] = [acc.y]
+                        self.dict_0[f"{tag}_pitch"] = [rot.pitch]
+                        self.dict_0[f"{tag}_yaw"] = [rot.yaw]
+                        self.dict_0[f"{tag}_roll"] = [rot.roll]
                     else:
-                        self.dict_0[f"{self.dict_index[index]}_id"].append(car.id)
-                        location = car.get_location()
-                        self.dict_0[f"{self.dict_index[index]}_x"].append(location.x)
-                        self.dict_0[f"{self.dict_index[index]}_y"].append(location.y)
-                        self.dict_0[f"{self.dict_index[index]}_z"].append(location.z)
-                        self.dict_0[f"{self.dict_index[index]}_speed(km/h)"].append(get_speed(car))
-                        self.dict_0[f"{self.dict_index[index]}_accx"].append(car.get_acceleration().x) # 加速度
-                        self.dict_0[f"{self.dict_index[index]}_accy"].append(car.get_acceleration().y)  # 加速度
-                        transform = car.get_transform()
-                        self.dict_0[f"{self.dict_index[index]}_pitch"].append(transform.rotation.pitch)
-                        self.dict_0[f"{self.dict_index[index]}_yaw"].append(transform.rotation.yaw)
-                        self.dict_0[f"{self.dict_index[index]}_roll"].append(transform.rotation.roll)
-                # 这里可以调节频率(艺术)
-                time.sleep(round(1/(self.fps+70),12))
+                        self.dict_0[f"{tag}_id"].append(car.id)
+                        self.dict_0[f"{tag}_x"].append(loc.x)
+                        self.dict_0[f"{tag}_y"].append(loc.y)
+                        self.dict_0[f"{tag}_z"].append(loc.z)
+                        self.dict_0[f"{tag}_speed(km/h)"].append(get_speed(car))
+                        self.dict_0[f"{tag}_accx"].append(acc.x)
+                        self.dict_0[f"{tag}_accy"].append(acc.y)
+                        self.dict_0[f"{tag}_pitch"].append(rot.pitch)
+                        self.dict_0[f"{tag}_yaw"].append(rot.yaw)
+                        self.dict_0[f"{tag}_roll"].append(rot.roll)
 
+                # control sampling frequency
+                time.sleep(round(1 / (self.fps + 70), 12))
 
-        threading.Thread(target=getinfo).start()
+        threading.Thread(target=_loop, daemon=True).start()
 
-    # 保存数据
+    # ----------------------------------------------------------------- #
+    # Dump to CSV
+    # ----------------------------------------------------------------- #
     def save_info(self):
+        """Stop logging and write the entire dictionary to a CSV file."""
         self.flag = False
-        # 找出最长的列表长度
-        max_length = max(len(values) for values in self.dict_0.values())
-        # 在每个列表的前面添加 None
-        for key in self.dict_0:
-            self.dict_0[key] = [None] * (max_length - len(self.dict_0[key])) + self.dict_0[key]
 
-        # 将数据写入CSV文件
-        with open(self.file_name, 'w', newline='', encoding="utf-8") as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(self.dict_0.keys())  # 写入列名
-            writer.writerows(zip(*self.dict_0.values()))  # 写入数据
+        # pad shorter columns with None so every list has equal length
+        max_len = max(len(v) for v in self.dict_0.values())
+        for key, lst in self.dict_0.items():
+            self.dict_0[key] = [None] * (max_len - len(lst)) + lst
+
+        with open(self.file_name, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(self.dict_0.keys())           # header row
+            writer.writerows(zip(*self.dict_0.values()))  # data rows

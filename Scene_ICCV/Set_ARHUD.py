@@ -1,13 +1,3 @@
-"""
-这个模块的作用是设置AR-HUD
-模块前面2个参数和pygame尺寸一定要对应！
-VIEW_WIDTH = 1800
-VIEW_HEIGHT =1000
-
-线框颜色参数是BB_COLOR
-
-在52行附近有线宽调节、line_width = 4
-"""
 
 
 

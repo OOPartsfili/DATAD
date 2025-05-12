@@ -1,21 +1,30 @@
 """
-这部分模块的作用是接管提示内容设计
-
-
+This module defines the visual and auditory prompts that notify the
+driver to take over control.
 """
-
 
 import pygame
 
-# 视觉接管提示内容
-def Vision_request():
-    print("Vision request")
+
+# --------------------------------------------------------------------- #
+# Visual takeover prompt
+# --------------------------------------------------------------------- #
+def visual_takeover_prompt() -> None:
+    """
+    Display or log a visual message telling the driver to take over.
+    (In a real application you would draw on‑screen graphics here.)
+    """
+    print("Visual takeover prompt")
 
 
-# 听觉接管提示内容
-def Video_requset():
-    # 加载音频文件
-    sound_file = 'asset/接管提示音.wav'  # 替换为你的WAV文件路径
+# --------------------------------------------------------------------- #
+# Auditory takeover prompt
+# --------------------------------------------------------------------- #
+def audio_takeover_prompt() -> None:
+    """
+    Play an audio clip that instructs the driver to take over.
+    Replace the WAV file path below with your own sound file.
+    """
+    sound_file = "asset/takeover_prompt.wav"  # <-- update to your WAV path
     sound = pygame.mixer.Sound(sound_file)
-    # 播放声音
     sound.play()

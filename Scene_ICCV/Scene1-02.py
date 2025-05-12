@@ -7,12 +7,7 @@ import Set_info
 import time
 
 
-"""
-更新版本
 
-新增车内图片、语言接管提示
-
-"""
 
 # 新的页面窗口
 class Window:
