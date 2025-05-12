@@ -1,14 +1,21 @@
 
 # DATAD: Driver Attention in Takeover of Autonomous Driving
 
+<div align="center">
+  <img src="image/Comparison_of_Attention_Heatmap.gif" alt="Attention Heatmap Comparison" width="600" height="auto" />
+</div>
+
 ## Overview
 
-**DATAD** (Driver Attention in Takeover of Autonomous Driving) is a dataset specifically designed for human-machine interaction research in autonomous driving. It captures driver gaze behavior, operational inputs, and surrounding traffic dynamics during emergency takeovers. 
+**DATAD** (Driver Attention in Takeover of Autonomous Driving) is a dataset specifically designed for human-machine interaction research in autonomous driving. It supports our paper, **_From Gaze to Movement: Predicting Visual Attention for Autonomous Driving Human-Machine Interaction based on Programmatic Imitation Learning_**.
 
-The dataset is collected from **60 participants** across **12 types of takeover scenarios** and includes approximately **600,000 frames** of gaze point data. This dataset provides insights into driver attention allocation, which is essential for enhancing autonomous vehicle safety and human-machine interaction strategies.
+The dataset captures driver gaze behavior, operational inputs, and surrounding traffic dynamics during emergency takeovers. It is collected from **60 participants** across **12 types of takeover scenarios** and includes approximately **600,000 frames** of gaze point data.
+
+This dataset provides insights into driver attention allocation, which is essential for enhancing autonomous vehicle safety and human-machine interaction strategies.
 
 ## Features
-- **Large-scale dataset**: 600,000 frames of driver gaze behavior
+- **Large-scale dataset**: Nearly 600,000 frames covering driver gaze behavior, with synchronized instance segmentation and RGB visual data, enabling detailed scene understanding in takeover scenarios.
+>>>>>>> 449d474 (Add Scene_ICCV simulation code and project structure)
 - **High-fidelity simulation**: Collected using CARLA-based driving simulators
 - **Comprehensive driving context**: Includes gaze data, vehicle control inputs, and surrounding traffic information
 - **Emergency scenarios**: Captures real-time driver reactions to critical events
@@ -45,6 +52,7 @@ DATAD/
 ├── Script/             # Python scripts for processing and visualization
 │   ├── visualize_gaze.py
 │   └── ...
+>>>>>>> 449d474 (Add Scene_ICCV simulation code and project structure)
 ├── README.md
 └── LICENSE
 ```
